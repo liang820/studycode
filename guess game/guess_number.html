@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>猜数字游戏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        button {
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>猜数字游戏</h1>
+    <div>
+        <p>当前最佳成绩: <span id="highscore">0</span>次</p>
+        <p>请选择难度:</p>
+        <button onclick="startGame(1)">简单 (1-50)</button>
+        <button onclick="startGame(2)">中等 (1-100)</button>
+        <button onclick="startGame(3)">困难 (1-200)</button>
+    </div>
+    <div id="gameArea" style="display: none;">
+        <p>我已经想好了一个<span id="range">1-100</span>之间的数字，开始猜吧！</p>
+        <input type="number" id="guessInput" min="1" max="100">
+        <button onclick="checkGuess()">提交</button>
+        <p id="hint"></p>
+        <p id="attempts">尝试次数: 0</p>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        let target, min = 1, max = 100, attempts = 0, highscore = 0;
+        
+        // 从localStorage获取最高分
+        if(localStorage.getItem('highscore')) {
+            highscore = parseInt(localStorage.getItem('highscore'));
+            document.getElementById('highscore').textContent = highscore;
+        }
+        
+        function startGame(difficulty) {
+            switch(difficulty) {
+                case 1: max = 50; break;
+                case 2: max = 100; break;
+                case 3: max = 200; break;
+            }
+            
+            document.getElementById('range').textContent = min + '-' + max;
+            document.getElementById('guessInput').min = min;
+            document.getElementById('guessInput').max = max;
+            
+            target = Math.floor(Math.random() * (max - min + 1)) + min;
+            attempts = 0;
+            document.getElementById('attempts').textContent = '尝试次数: 0';
+            document.getElementById('hint').textContent = '';
+            document.getElementById('result').textContent = '';
+            
+            document.getElementById('gameArea').style.display = 'block';
+        }
+        
+        function checkGuess() {
+            const guess = parseInt(document.getElementById('guessInput').value);
+            if(isNaN(guess) || guess < min || guess > max) {
+                alert('请输入有效的数字！');
+                return;
+            }
+            
+            attempts++;
+            document.getElementById('attempts').textContent = '尝试次数: ' + attempts;
+            
+            if(guess < target) {
+                document.getElementById('hint').textContent = '小了！';
+            } else if(guess > target) {
+                document.getElementById('hint').textContent = '大了！';
+            } else {
+                document.getElementById('result').textContent = 
+                    `恭喜你猜对了！用了${attempts}次尝试。`;
+                
+                if(highscore === 0 || attempts < highscore) {
+                    document.getElementById('result').textContent += ' 新纪录！';
+                    highscore = attempts;
+                    document.getElementById('highscore').textContent = highscore;
+                    localStorage.setItem('highscore', highscore);
+                }
+                
+                document.getElementById('gameArea').style.display = 'none';
+            }
+            
+            document.getElementById('guessInput').value = '';
+        }
+    </script>
+</body>
+</html>
